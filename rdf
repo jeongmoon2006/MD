@@ -1,0 +1,72 @@
+# bins_, gr = rdf(p.atoms.positions, p.atoms.positions, box, 10, nbins = 100 )
+
+import numpy as np
+def rdf(pos_A, pos_B, box, max_radius, n_bins):
+    '''
+    Input:
+      pos_A(numpy.ndarray) : (N, 3) position of A molecules or atoms 
+      pos_B(numpy.ndarray) : (M, 3) position of B molecules or atoms
+      box(numpy.ndarray) : (3, ) size of box in Å
+      max_radius(float in Å) : maximum radius(distance from a molecule)
+      n_bins(int) : number of beans
+      
+    output:
+      bins(numpy.ndarray) : (n_bins,) array of bins
+      gr(numpy.ndarray) : (n_bins, ) radial distribution function
+      nr(numpy.ndarray) : (n_bins, ) number of cumulative molecules
+    
+    '''
+    
+    #rdf = dv_N*rho/dv
+
+    #Lets first consider the case where N = M
+    N = pos_A.shape[0]
+    rho = N /(box[0]*box[1]*box[2]) #total molecule density
+    bins = np.linspace(0, max_radius, n_bins)
+    dr = bins[1] - bins[0]
+    r = np.append(bins, [max_radius + dr])
+    
+
+    
+    #Let's compute distance between molecules (N*N,)
+    dist = np.abs(pos_A[:, np.newaxis, :] - pos_B)
+    ddist = np.abs(dist - box)
+    dist = np.minimum(dist, ddist)
+    dist = np.reshape(dist*dist, (N*N,3))
+    dist = np.sum(dist,axis = 1)
+    dist = dist[ dist != 0]
+    dist = np.sqrt(dist)
+
+    
+    #delete zero values and sort it
+    dist = dist[dist !=0]
+    dist = np.sort(dist)
+    
+    
+    #putting into bins
+    p = 0
+    k = 0
+    nr = np.zeros(n_bins+1)
+    rdf = np.zeros(n_bins)
+    for i in range (dist.shape[0]):
+        if dist[i] < r[p]:
+          k = k+1
+        else:
+            nr[p] = k
+            p = p+1
+            if p == n_bins+1:
+                break
+    
+    for i in range (n_bins):
+        rdf[i] = nr[i+1] - nr[i]
+
+    
+    #Let's get volume occupied by dr
+    dv = np.zeros(n_bins)
+    for i in range (n_bins):
+        dv[i] = 4*np.pi*r[i+1]*r[i+1]*dr
+    rdf = rdf / (dv *rho*N)
+    
+    return bins, nr, rdf
+            
+
