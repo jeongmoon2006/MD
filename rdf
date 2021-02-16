@@ -24,9 +24,7 @@ def rdf(pos_A, pos_B, box, max_radius, n_bins):
     rho = N /(box[0]*box[1]*box[2]) #total molecule density
     bins = np.linspace(0, max_radius, n_bins)
     dr = bins[1] - bins[0]
-    r = np.append(bins, [max_radius + dr])
-    
-
+#     r = np.append(bins, [max_radius + dr])
     
     #Let's compute distance between molecules (N*N,)
     dist = np.abs(pos_A[:, np.newaxis, :] - pos_B)
@@ -36,37 +34,35 @@ def rdf(pos_A, pos_B, box, max_radius, n_bins):
     dist = np.sum(dist,axis = 1)
     dist = dist[ dist != 0]
     dist = np.sqrt(dist)
-
-    
-    #delete zero values and sort it
-    dist = dist[dist !=0]
     dist = np.sort(dist)
     
-    
-    #putting into bins
     p = 0
-    k = 0
-    nr = np.zeros(n_bins+1)
+    i = 0
+    m = 0
+    nr = np.zeros(n_bins)
     rdf = np.zeros(n_bins)
-    for i in range (dist.shape[0]):
-        if dist[i] < r[p]:
-          k = k+1
-        else:
-            nr[p] = k
-            p = p+1
-            if p == n_bins+1:
-                break
-    
-    for i in range (n_bins):
-        rdf[i] = nr[i+1] - nr[i]
 
-    
+    while True:
+        while dist[i] > bins[p]:
+            nr[p] = m
+            p = p+1
+            if p== len(nr):
+                break
+        else:
+            i = i+1
+            m = m+1
+            if i == len(dist):
+                break
+        if p == len(nr):
+            break
+            
+    for i in range (n_bins-1):
+        rdf[i+1] = nr[i+1] - nr[i]
+
     #Let's get volume occupied by dr
     dv = np.zeros(n_bins)
-    for i in range (n_bins):
-        dv[i] = 4*np.pi*r[i+1]*r[i+1]*dr
-    rdf = rdf / (dv *rho*N)
+    dv = 4*np.pi*(bins[1:]**2)*dr
+    rdf[1:] = rdf[1:] / (dv *rho*N)
     
-    return bins, nr, rdf
-            
+    return bins, rdf, nr
 
