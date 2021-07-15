@@ -66,3 +66,31 @@ def rdf(pos_A, pos_B, box, max_radius, n_bins):
     
     return bins, rdf, nr
 
+
+def rdf_average(array, fs_atom_name, sn_atom_name , n_bins):
+
+    '''
+    Input:
+      array(numpy.ndarray) : (n_time_frames)  ex) [0,100,200,300...,1000]
+      
+    output:
+      bins(numpy.ndarray) : (n_bins,) array of bins
+      gr_average(numpy.ndarray) : (n_bins, ) radial distribution function
+      nr_average(numpy.ndarray) : (n_bins, ) number of cumulative molecules
+    
+    '''
+    box = np.array([23, 23, 23])
+    
+    
+    rdf__ = np.zeros(n_bins)
+    nrr = np.zeros(n_bins)
+    
+    for i in array:
+        u.trajectory[np.int(i)]
+        p = u.select_atoms(fs_atom_name)
+        pp = u.select_atoms(sn_atom_name)
+        bins, rdf_, nr = rdf(p.atoms.positions, pp.atoms.positions, box, 10, n_bins)
+        rdf__ += rdf_
+        nrr += nr
+        
+    return bins, rdf__/len(array), nrr/len(array)
