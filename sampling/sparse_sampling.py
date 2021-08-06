@@ -1,6 +1,5 @@
 # This code is writting by Jeongmoon Choi
 # email: jeongmoon2006@gmail.com
-## change
 
 import numpy as np
 import matplotlib.pyplot as plt
