@@ -134,7 +134,7 @@ class sparse_sampling:
         for i in range(self.n_simulation):
             q_diff = -(self.average_q[i]-np.float(self.q_star_arr[i]))
             beta_T = 1/8.314/temperature*1000
-            dfdq_star+=[0.01*q_diff*beta_T]
+            dfdq_star+=[self.kappa*q_diff*beta_T]
 
         dfdq_star=np.array(dfdq_star)
 
