@@ -102,5 +102,20 @@ class binwham:
         
         else:
             print('fail to do minimization')
+            
+            
+     def driving_force(self):
+        _,_,F = self.MLE_optimize()
+        
+        df = np.zeros(len(F)-1,)
+        for i in range(len(F)-1):
+            df[i] = (F[i+1] - F[i])/(self.bins_[i+1] - self.bins_[i])
+        
+        figure(figsize=(8,6), dpi = 200)
+        plt.plot(self.bins_[1:], df)
+        plt.xlabel(r'$q$', fontsize = 15)
+        plt.ylabel(r'$\beta \frac{\partial F}{\partial q}$', fontsize=15)
+        
+        return self.bins_[1:], df
         
         
