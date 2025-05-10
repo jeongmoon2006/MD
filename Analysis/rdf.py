@@ -1,3 +1,5 @@
+# rdf.py
+
 import numpy as np
 
 def compute_rdf(pos_A, pos_B, box, max_radius, n_bins):
@@ -26,3 +28,25 @@ def compute_rdf(pos_A, pos_B, box, max_radius, n_bins):
     cumulative = np.cumsum(counts)
 
     return edges[:-1], rdf, cumulative
+
+
+def rdf_average(u, time_indices, fs_atom_name, sn_atom_name, n_bins, max_radius=10):
+    """
+    Average RDF over selected time frames from MDAnalysis universe.
+    """
+    rdf_sum = np.zeros(n_bins)
+    nr_sum = np.zeros(n_bins)
+
+    for frame_idx in time_indices:
+        u.trajectory[frame_idx]
+        box = u.dimensions[:3]
+        
+        pos_A = u.select_atoms(fs_atom_name).positions
+        pos_B = u.select_atoms(sn_atom_name).positions
+        
+        bins, rdf, nr = compute_rdf(pos_A, pos_B, box, max_radius, n_bins)
+        rdf_sum += rdf
+        nr_sum += nr / len(pos_A)
+
+    return bins, rdf_sum / len(time_indices), nr_sum / len(time_indices)
+
